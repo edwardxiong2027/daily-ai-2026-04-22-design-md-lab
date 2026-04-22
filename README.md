@@ -1,6 +1,6 @@
 # Design MD Lab
 
-Design MD Lab is a tiny browser-native playground inspired by Google's newly open-sourced DESIGN.md concept in Stitch.
+Design MD Lab is a browser-native playground inspired by Google's newly open-sourced DESIGN.md concept in Stitch, redesigned with a sharper Kimi K2.6-style product aesthetic.
 
 Live app: https://edwardxiong2027.github.io/daily-ai-2026-04-22-design-md-lab/
 Repo: https://github.com/edwardxiong2027/daily-ai-2026-04-22-design-md-lab

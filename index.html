@@ -4,412 +4,545 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Design MD Lab</title>
-  <meta name="description" content="A cutting-edge playground for Google's newly open-sourced DESIGN.md concept: edit agent-readable design specs, lint them, preview tokens, and audit accessibility in the browser." />
+  <meta name="description" content="Kimi K2.6-inspired DESIGN.md workspace for sharper agent-readable design specs, live linting, accessibility checks, and instant UI previews." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #09111f;
-      --bg-soft: rgba(14, 23, 39, 0.82);
-      --panel: rgba(16, 27, 45, 0.86);
-      --panel-strong: #111c30;
-      --line: rgba(148, 163, 184, 0.18);
-      --text: #eef4ff;
-      --muted: #9fb0cc;
-      --accent: #76e4ff;
-      --accent-2: #a78bfa;
-      --good: #51d39c;
-      --warn: #ffce6a;
-      --bad: #ff7d7d;
-      --shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
-      --radius: 22px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #06070b;
+      --bg-2: #0b0d12;
+      --panel: rgba(255,255,255,0.03);
+      --panel-2: rgba(255,255,255,0.045);
+      --panel-3: rgba(255,255,255,0.065);
+      --line: rgba(255,255,255,0.09);
+      --line-2: rgba(255,255,255,0.16);
+      --text: #f4f7fb;
+      --text-2: #c8d1dc;
+      --text-3: #8891a1;
+      --accent: #7c85ff;
+      --accent-2: #9ea5ff;
+      --accent-soft: rgba(124,133,255,0.14);
+      --success: #39d98a;
+      --warn: #ffb84d;
+      --bad: #ff6f7f;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: var(--sans);
       color: var(--text);
+      font-family: var(--sans);
       background:
-        radial-gradient(circle at top left, rgba(118, 228, 255, 0.14), transparent 35%),
-        radial-gradient(circle at top right, rgba(167, 139, 250, 0.16), transparent 34%),
-        linear-gradient(180deg, #08101d 0%, #0f1727 45%, #0b1220 100%);
+        radial-gradient(circle at 15% 10%, rgba(124,133,255,0.16), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(255,255,255,0.08), transparent 18%),
+        linear-gradient(180deg, #05060a 0%, #0a0c12 52%, #05060a 100%);
+      letter-spacing: -0.01em;
     }
 
-    a { color: inherit; }
+    a { color: inherit; text-decoration: none; }
 
-    .shell {
+    .frame {
       width: min(1420px, calc(100vw - 32px));
-      margin: 24px auto 56px;
+      margin: 18px auto 60px;
       display: grid;
       gap: 18px;
     }
 
-    .hero, .panel {
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
       border: 1px solid var(--line);
-      background: var(--bg-soft);
+      background: rgba(8, 10, 16, 0.86);
       backdrop-filter: blur(18px);
+      border-radius: 18px;
       box-shadow: var(--shadow);
-      border-radius: var(--radius);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      width: 13px;
+      height: 13px;
+      background: linear-gradient(135deg, var(--accent), #ffffff);
+      box-shadow: 0 0 30px rgba(124,133,255,0.6);
+      border-radius: 3px;
+      transform: rotate(45deg);
+    }
+
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-meta small {
+      color: var(--text-3);
+      font: 11px/1.2 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-chip,
+    button,
+    .button-link {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    .nav-chip:hover,
+    button:hover,
+    .button-link:hover {
+      border-color: var(--line-2);
+      background: rgba(255,255,255,0.055);
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, var(--accent), #5f6bff);
+      border-color: rgba(124,133,255,0.7);
+      color: white;
+      box-shadow: 0 12px 28px rgba(124,133,255,0.25);
     }
 
     .hero {
-      padding: 28px;
       display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
       gap: 18px;
-      grid-template-columns: 1.45fr 1fr;
+      align-items: stretch;
     }
 
-    .headline {
-      display: grid;
-      gap: 14px;
+    .hero-panel,
+    .panel,
+    .preview-shell,
+    .source-panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.02));
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-panel {
+      padding: 26px;
+      position: relative;
+      min-height: 380px;
+    }
+
+    .hero-panel::after {
+      content: '';
+      position: absolute;
+      inset: auto -10% -25% auto;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(124,133,255,0.26) 0%, rgba(124,133,255,0) 70%);
+      pointer-events: none;
+      filter: blur(10px);
     }
 
     .eyebrow {
       display: inline-flex;
-      width: fit-content;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid rgba(124,133,255,0.22);
+      background: rgba(124,133,255,0.08);
+      color: var(--accent-2);
+      border-radius: 999px;
+      font: 11px/1.2 var(--mono);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--accent);
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(118, 228, 255, 0.22);
-      background: rgba(118, 228, 255, 0.08);
+      width: fit-content;
     }
 
     h1 {
-      margin: 0;
-      font-size: clamp(2rem, 4vw, 4.4rem);
-      line-height: 0.97;
-      letter-spacing: -0.05em;
+      margin: 18px 0 12px;
+      font-size: clamp(2.8rem, 6vw, 6rem);
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+      max-width: 780px;
     }
 
-    .subhead {
-      margin: 0;
-      max-width: 820px;
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 1rem;
+    .hero-copy {
+      max-width: 760px;
+      color: var(--text-2);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin: 0 0 22px;
     }
 
-    .hero-cards {
+    .hero-grid {
       display: grid;
-      gap: 12px;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
     }
 
-    .mini-card, .info-card {
-      border-radius: 18px;
+    .hero-stat {
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
       padding: 14px;
     }
 
-    .mini-card strong, .info-card strong {
+    .hero-stat strong {
       display: block;
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
       margin-bottom: 6px;
-      font-size: 0.88rem;
     }
 
-    .mini-card span, .info-card span {
-      color: var(--muted);
-      font-size: 0.92rem;
+    .hero-stat span {
+      color: var(--text-3);
+      font-size: 0.9rem;
       line-height: 1.45;
     }
 
     .hero-side {
+      padding: 18px;
       display: grid;
-      gap: 12px;
-      align-content: start;
+      gap: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
     }
 
-    .signal-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 10px;
-    }
-
-    .signal-list li {
-      padding: 12px 14px;
-      border-radius: 16px;
+    .terminal {
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.035);
-      color: var(--muted);
-      line-height: 1.45;
+      background: #05070c;
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 180px;
+      font: 13px/1.7 var(--mono);
+      color: #dfe6ff;
     }
 
-    .signal-list b { color: var(--text); }
+    .terminal .muted { color: #7d86a0; }
+    .terminal .accent { color: #9ea5ff; }
+    .terminal .ok { color: var(--success); }
+
+    .signal-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.025);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .signal-card strong { font-size: 1rem; }
+    .signal-card span { color: var(--text-2); line-height: 1.55; font-size: 0.94rem; }
 
     .workspace {
       display: grid;
-      gap: 18px;
       grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
       align-items: start;
     }
 
     .panel {
       padding: 20px;
-    }
-
-    .panel h2 {
-      margin: 0 0 6px;
-      font-size: 1.1rem;
-      letter-spacing: -0.02em;
-    }
-
-    .panel p.lead {
-      margin: 0 0 16px;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 0.95rem;
-    }
-
-    .toolbar, .template-row, .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    button, .ghost-link {
-      appearance: none;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(255, 255, 255, 0.035);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 11px 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-      text-decoration: none;
-    }
-
-    button:hover, .ghost-link:hover {
-      transform: translateY(-1px);
-      border-color: rgba(118, 228, 255, 0.45);
-      background: rgba(118, 228, 255, 0.08);
-    }
-
-    button.primary {
-      background: linear-gradient(135deg, rgba(118, 228, 255, 0.28), rgba(167, 139, 250, 0.26));
-      border-color: rgba(118, 228, 255, 0.38);
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 540px;
-      resize: vertical;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      background: rgba(3, 8, 18, 0.56);
-      color: var(--text);
-      padding: 18px;
-      font: 14px/1.6 var(--mono);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
-    }
-
-    .right-grid {
-      display: grid;
-      gap: 18px;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .pill {
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .pill.good { color: var(--good); border-color: rgba(81, 211, 156, 0.3); background: rgba(81, 211, 156, 0.08); }
-    .pill.warn { color: var(--warn); border-color: rgba(255, 206, 106, 0.28); background: rgba(255, 206, 106, 0.08); }
-    .pill.bad { color: var(--bad); border-color: rgba(255, 125, 125, 0.28); background: rgba(255, 125, 125, 0.08); }
-
-    .stats {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      margin-bottom: 16px;
-    }
-
-    .stat {
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 1.45rem;
-      letter-spacing: -0.04em;
-      margin-bottom: 6px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    .audit-list, .preview-notes {
-      display: grid;
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .audit-item {
-      display: grid;
-      gap: 6px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.028);
-    }
-
-    .audit-item strong {
-      font-size: 0.94rem;
-    }
-
-    .audit-item span {
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.9rem;
-    }
-
-    .preview {
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      background: var(--panel-strong);
-    }
-
-    .preview-top {
-      padding: 20px;
-      background: linear-gradient(135deg, rgba(118, 228, 255, 0.16), rgba(167, 139, 250, 0.14));
-      border-bottom: 1px solid var(--line);
-    }
-
-    .preview-top h3 {
-      margin: 0 0 8px;
-      font-size: 1.2rem;
-      letter-spacing: -0.03em;
-    }
-
-    .preview-top p {
-      margin: 0;
-      color: rgba(238, 244, 255, 0.82);
-      line-height: 1.5;
-    }
-
-    .preview-body {
-      padding: 22px;
       display: grid;
       gap: 16px;
     }
 
-    .fake-nav {
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .panel-header h2,
+    .preview-head h2,
+    .source-panel h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .panel-header p,
+    .preview-head p,
+    .source-panel p {
+      margin: 6px 0 0;
+      color: var(--text-3);
+      line-height: 1.55;
+      max-width: 720px;
+    }
+
+    .template-row,
+    .toolbar,
+    .pill-row,
+    .preview-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 630px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: #06080e;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 18px;
+      font: 13.5px/1.7 var(--mono);
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: rgba(124,133,255,0.52);
+      box-shadow: 0 0 0 1px rgba(124,133,255,0.2);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      letter-spacing: -0.05em;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--text-3);
+      font-size: 0.87rem;
+    }
+
+    .pill {
+      padding: 8px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font: 11px/1.2 var(--mono);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      background: rgba(255,255,255,0.025);
+    }
+
+    .pill.good { color: var(--success); border-color: rgba(57,217,138,0.24); background: rgba(57,217,138,0.08); }
+    .pill.warn { color: var(--warn); border-color: rgba(255,184,77,0.24); background: rgba(255,184,77,0.08); }
+    .pill.bad { color: var(--bad); border-color: rgba(255,111,127,0.24); background: rgba(255,111,127,0.08); }
+
+    .audit-list,
+    .insight-list,
+    .spec-notes {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .audit-item,
+    .insight-item,
+    .note-item {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.022);
+      border-radius: 14px;
+      padding: 13px 14px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .audit-item strong,
+    .insight-item strong,
+    .note-item strong { font-size: 0.94rem; }
+    .audit-item span,
+    .insight-item span,
+    .note-item span { color: var(--text-2); line-height: 1.5; font-size: 0.92rem; }
+
+    .preview-shell {
+      display: grid;
+      gap: 0;
+    }
+
+    .preview-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .preview-body {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+      background: linear-gradient(180deg, #07080d 0%, #090b10 100%);
+    }
+
+    .product-frame {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    }
+
+    .product-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
       padding: 14px 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
     }
 
-    .logo-badge {
-      display: inline-flex;
+    .product-brand {
+      display: flex;
       align-items: center;
       gap: 10px;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
-    .logo-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
+    .product-brand .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      transform: rotate(45deg);
       background: var(--accent);
-      box-shadow: 0 0 18px rgba(118, 228, 255, 0.6);
+      box-shadow: 0 0 18px rgba(124,133,255,0.6);
     }
 
-    .fake-links {
+    .product-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
-    .fake-link {
-      padding: 8px 10px;
+    .product-chip {
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 999px;
-      font-size: 0.85rem;
-      background: rgba(255,255,255,0.04);
-      color: rgba(255,255,255,0.76);
+      color: var(--text-3);
+      background: rgba(255,255,255,0.025);
+      font-size: 0.82rem;
+    }
+
+    .product-main {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: start;
     }
 
     .hero-card {
-      padding: 18px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018));
+      border-radius: 20px;
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+      min-height: 280px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -100px;
+      top: -100px;
+      background: radial-gradient(circle, rgba(124,133,255,0.25), rgba(124,133,255,0));
+      pointer-events: none;
+    }
+
+    .hero-card h3 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      max-width: 560px;
+    }
+
+    .hero-card p {
+      margin: 0;
+      color: var(--text-2);
+      line-height: 1.65;
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-row { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+
+    .preview-right {
       display: grid;
       gap: 14px;
     }
 
-    .hero-card .cta-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .cta {
-      border: none;
-      background: var(--accent);
-      color: #07111f;
-      font-weight: 700;
-    }
-
-    .secondary {
-      border-color: rgba(255,255,255,0.14);
-      color: rgba(255,255,255,0.92);
-    }
-
     .token-grid {
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .swatch {
-      border-radius: 18px;
+      min-height: 105px;
+      border-radius: 16px;
       padding: 14px;
-      border: 1px solid rgba(255,255,255,0.09);
-      min-height: 100px;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       gap: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
     }
 
-    .swatch code {
-      font: 12px var(--mono);
-      opacity: 0.84;
+    .swatch code { font: 11.5px/1.4 var(--mono); opacity: 0.9; }
+
+    .source-panel {
+      padding: 20px;
+      display: grid;
+      gap: 14px;
     }
 
     .source-links {
@@ -418,211 +551,277 @@
     }
 
     .source-links a {
-      display: block;
-      padding: 12px 14px;
-      border-radius: 16px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--muted);
-      text-decoration: none;
-      line-height: 1.45;
+      background: rgba(255,255,255,0.025);
+      border-radius: 14px;
+      padding: 14px;
+      color: var(--text-2);
+      line-height: 1.55;
     }
 
     .source-links a:hover {
-      color: var(--text);
-      border-color: rgba(118, 228, 255, 0.42);
+      border-color: var(--line-2);
+      background: rgba(255,255,255,0.04);
     }
 
-    .footer-links {
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 0.92rem;
+    .footer-note {
+      color: var(--text-3);
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
 
-    .footer-links div { display: flex; gap: 12px; flex-wrap: wrap; }
+    @media (max-width: 1120px) {
+      .hero,
+      .workspace,
+      .product-main { grid-template-columns: 1fr; }
+      .hero-grid,
+      .stats { grid-template-columns: 1fr; }
+      .token-grid { grid-template-columns: 1fr 1fr; }
+    }
 
-    @media (max-width: 1100px) {
-      .hero, .workspace { grid-template-columns: 1fr; }
-      .hero-cards, .stats, .token-grid { grid-template-columns: 1fr; }
-      textarea { min-height: 420px; }
+    @media (max-width: 720px) {
+      .frame { width: min(100vw - 18px, 1420px); }
+      .topbar,
+      .hero-panel,
+      .hero-side,
+      .panel,
+      .preview-head,
+      .preview-body,
+      .source-panel { padding-left: 14px; padding-right: 14px; }
+      h1 { font-size: clamp(2.25rem, 14vw, 4rem); }
+      .hero-grid,
+      .token-grid,
+      .stats { grid-template-columns: 1fr; }
+      textarea { min-height: 440px; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="frame">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-meta">
+          <div>Design MD Lab</div>
+          <small>K2.6-inspired agent design workspace</small>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a class="nav-chip" href="#editor-panel">Editor</a>
+        <a class="nav-chip" href="#preview-panel">Preview</a>
+        <a class="nav-chip" href="https://github.com/edwardxiong2027/daily-ai-2026-04-22-design-md-lab" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </header>
+
     <section class="hero">
-      <div class="headline">
-        <div class="eyebrow">Fresh concept • agent-readable design specs</div>
-        <h1>Design MD Lab</h1>
-        <p class="subhead">
-          A browser-native playground inspired by Google Stitch's newly open-sourced DESIGN.md format.
-          Write an agent-readable design spec, lint it live, preview the resulting UI direction, and run instant accessibility checks before handing it to a model or coding agent.
+      <div class="hero-panel">
+        <div class="eyebrow">Kimi K2.6 style • sharper product surface • agent-ready handoff</div>
+        <h1>Write design specs that feel ready for a real agent stack.</h1>
+        <p class="hero-copy">
+          This redesign drops the generic AI-demo aesthetic. It reframes Design MD Lab as a sharper command surface for agent-readable design specs: cleaner hierarchy, tighter tone, and a more product-grade K2.6-inspired UI language.
         </p>
-        <div class="hero-cards">
-          <div class="mini-card"><strong>Live linting</strong><span>Find missing sections, weak token coverage, unclear goals, and absent accessibility guidance.</span></div>
-          <div class="mini-card"><strong>Instant preview</strong><span>Turn design tokens and product intent into a visual mockup without leaving the page.</span></div>
-          <div class="mini-card"><strong>WCAG audit</strong><span>Check contrast ratios on core token pairs so agents do not hallucinate inaccessible palettes.</span></div>
+        <div class="hero-grid">
+          <div class="hero-stat">
+            <strong>Human + agent readable</strong>
+            <span>Turn one DESIGN.md into a usable handoff artifact for founders, designers, and coding agents.</span>
+          </div>
+          <div class="hero-stat">
+            <strong>Live structural linting</strong>
+            <span>Catch weak specs before they become vague layouts, muddy hierarchy, or accessibility regressions.</span>
+          </div>
+          <div class="hero-stat">
+            <strong>Preview before handoff</strong>
+            <span>See the product direction implied by your tokens, tone, goals, and hero narrative instantly.</span>
+          </div>
         </div>
       </div>
-      <div class="hero-side">
-        <div class="info-card">
-          <strong>Why this exists now</strong>
-          <span>Google opened up the draft DESIGN.md spec so AI systems can reason about design intent instead of guessing from screenshots. This app turns that idea into a practical, shippable workflow.</span>
+
+      <aside class="hero-side">
+        <div class="terminal">
+<span class="muted">$ kimi-k2.6 design-md analyze</span>
+> reading product intent
+> mapping tokens into surface system
+> checking CTA clarity
+> auditing text/background contrast
+> validating accessibility rules
+<span class="ok">✓ ready for agent handoff</span>
+
+<span class="accent">Signals used:</span>
+- Better Coding, Smarter Agents
+- Agent Swarm / reusable skills
+- sharper full-stack product styling
         </div>
-        <ul class="signal-list">
-          <li><b>New format:</b> DESIGN.md is positioned as a shared visual language across tools and agents.</li>
-          <li><b>New workflow:</b> Autonomous research and coding agents are expanding fast, so structured handoff artifacts are suddenly valuable.</li>
-          <li><b>New pain point:</b> Teams need human-readable + model-readable design prompts with built-in accessibility safeguards.</li>
-        </ul>
-      </div>
+        <div class="signal-card">
+          <strong>What changed in this redesign</strong>
+          <span>Stronger dark-mode composition, less rounded “AI app” chrome, tighter typography, more deliberate surface contrast, and a Kimi-like product-launch tone.</span>
+        </div>
+        <div class="signal-card">
+          <strong>Core use case</strong>
+          <span>Create a spec that a coding agent can execute without guessing your design system from screenshots or vibes alone.</span>
+        </div>
+      </aside>
     </section>
 
     <section class="workspace">
-      <div class="panel">
-        <h2>Spec editor</h2>
-        <p class="lead">Load a starter spec, customize it, then export a polished DESIGN.md file for your own agent stack. The syntax here is intentionally simple and readable.</p>
+      <div class="panel" id="editor-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Spec editor</h2>
+            <p>Load a template, tune the product voice, and export a cleaner DESIGN.md artifact for your own agent pipeline.</p>
+          </div>
+        </div>
         <div class="template-row" id="templateRow"></div>
-        <div class="toolbar" style="margin: 14px 0 16px;">
-          <button class="primary" id="downloadBtn">Download DESIGN.md</button>
-          <button id="copyBtn">Copy to clipboard</button>
-          <button id="resetBtn">Reset to template</button>
+        <div class="toolbar">
+          <button class="button-primary" id="downloadBtn">Download DESIGN.md</button>
+          <button id="copyBtn">Copy spec</button>
+          <button id="resetBtn">Reset template</button>
         </div>
         <textarea id="editor" spellcheck="false"></textarea>
       </div>
 
-      <div class="right-grid">
-        <div class="panel">
-          <h2>Lint summary</h2>
-          <p class="lead">A quick signal panel for whether your design spec is strong enough for an autonomous agent handoff.</p>
-          <div class="stats">
-            <div class="stat"><strong id="coverageScore">0%</strong><span>Section coverage</span></div>
-            <div class="stat"><strong id="tokenScore">0</strong><span>Design tokens found</span></div>
-            <div class="stat"><strong id="contrastScore">0</strong><span>Contrast checks passed</span></div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Live lint summary</h2>
+            <p>These checks are optimized for stronger agent execution, not just pretty markdown.</p>
           </div>
-          <div class="pill-row" id="summaryPills"></div>
-          <ul class="audit-list" id="auditList"></ul>
         </div>
+        <div class="stats">
+          <div class="stat"><strong id="coverageScore">0%</strong><span>Structure coverage</span></div>
+          <div class="stat"><strong id="tokenScore">0</strong><span>Token fields found</span></div>
+          <div class="stat"><strong id="contrastScore">0/0</strong><span>Contrast checks passed</span></div>
+        </div>
+        <div class="pill-row" id="summaryPills"></div>
+        <ul class="audit-list" id="auditList"></ul>
+        <ul class="insight-list" id="insightList"></ul>
+      </div>
+    </section>
 
-        <div class="panel">
-          <h2>Agent-ready preview</h2>
-          <p class="lead">A stylized UI preview generated directly from your spec's intent, tone, and core tokens.</p>
-          <div class="preview">
-            <div class="preview-top" id="previewTop">
-              <h3 id="previewTitle">Agent-ready product surface</h3>
-              <p id="previewDescription">Structured intent, visual tokens, and accessibility rules all in one place.</p>
-            </div>
-            <div class="preview-body" id="previewBody">
-              <div class="fake-nav">
-                <div class="logo-badge"><span class="logo-dot" id="logoDot"></span><span id="brandName">SignalFlow</span></div>
-                <div class="fake-links" id="fakeLinks"></div>
+    <section class="preview-shell" id="preview-panel">
+      <div class="preview-head">
+        <div>
+          <h2>Agent-ready product preview</h2>
+          <p>A sharper launch-style preview derived from your spec’s goals, tone, hero message, and token system.</p>
+        </div>
+        <div class="preview-tags" id="previewTags"></div>
+      </div>
+      <div class="preview-body">
+        <div class="product-frame">
+          <div class="product-top">
+            <div class="product-brand"><span class="dot" id="brandDot"></span><span id="brandName">SignalForge</span></div>
+            <div class="product-actions" id="navLinks"></div>
+          </div>
+          <div class="product-main" id="productMain">
+            <div class="hero-card" id="heroCard">
+              <div class="eyebrow" id="previewBadge">Launch-ready interface</div>
+              <h3 id="heroHeadline">Give your agent a spec it can actually execute.</h3>
+              <p id="heroBody">Define the product voice, CTA structure, design tokens, accessibility rules, and component system in one human-readable file.</p>
+              <div class="cta-row">
+                <button class="button-primary" id="primaryCta">Start building</button>
+                <button id="secondaryCta">Inspect system</button>
               </div>
-              <div class="hero-card" id="heroCard">
-                <div>
-                  <div class="eyebrow" id="previewTag">Launch-ready concept</div>
-                  <h3 id="heroHeadline">A homepage that explains what the product does in 5 seconds.</h3>
-                  <p id="heroBody">Use clear product positioning, visible trust markers, and buttons that push the user toward the primary action.</p>
-                </div>
-                <div class="cta-row">
-                  <button class="cta" id="primaryCta">Try it now</button>
-                  <button class="secondary" id="secondaryCta">See architecture</button>
+            </div>
+            <div class="preview-right">
+              <div class="panel" style="padding:14px; background: rgba(255,255,255,0.03); border-radius:18px;">
+                <div style="display:grid; gap:8px;">
+                  <strong id="previewTitle">Product title</strong>
+                  <span id="previewDescription" style="color:var(--text-2); line-height:1.6;">A concise positioning statement appears here.</span>
                 </div>
               </div>
               <div class="token-grid" id="tokenGrid"></div>
-              <ul class="preview-notes" id="previewNotes"></ul>
             </div>
           </div>
         </div>
+        <ul class="spec-notes" id="previewNotes"></ul>
+      </div>
+    </section>
 
-        <div class="panel">
-          <h2>Source signal</h2>
-          <p class="lead">This project follows the newest design-agent workflow signals rather than old generic demo patterns.</p>
-          <div class="source-links">
-            <a href="https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/" target="_blank" rel="noreferrer">Google: Stitch's DESIGN.md draft specification is now open source so agents can understand design intent and validate choices against accessibility rules.</a>
-            <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/" target="_blank" rel="noreferrer">Google: Deep Research and Deep Research Max frame autonomous research agents as a fast-moving product category.</a>
-            <a href="https://www.brex.com/crabtrap" target="_blank" rel="noreferrer">Brex: CrabTrap shows the production push toward agent infrastructure and safer autonomous behavior.</a>
-          </div>
-          <div class="footer-links">
-            <span>Built for a weekly shipped-project cadence focused on new AI interfaces, formats, and workflows.</span>
-            <div>
-              <a class="ghost-link" href="https://github.com/edwardxiong2027" target="_blank" rel="noreferrer">GitHub profile</a>
-            </div>
-          </div>
-        </div>
+    <section class="source-panel">
+      <div>
+        <h2>Why this redesign looks different</h2>
+        <p>This version is intentionally closer to the sharper Kimi / high-end agent-tool aesthetic and further away from generic gradient-heavy AI landing pages.</p>
+      </div>
+      <div class="source-links">
+        <a href="https://kimi.ai" target="_blank" rel="noreferrer">Kimi AI positioning signal: “Better Coding, Smarter Agents,” plus emphasis on stunning websites, Agent Swarm, and reusable skills.</a>
+        <a href="https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/" target="_blank" rel="noreferrer">Google Stitch / DESIGN.md signal: agent-readable design artifacts matter because models should understand intent, not just screenshots.</a>
+        <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/" target="_blank" rel="noreferrer">Deep Research Max signal: autonomous research and execution agents are becoming a real product category, increasing the value of cleaner handoff formats.</a>
+      </div>
+      <div class="footer-note">
+        This is still a static, browser-native app — but now the visual system is much closer to a modern shipped product than a generic AI demo shell.
       </div>
     </section>
   </div>
 
   <script>
     const templates = {
-      landing: `# Product
+      launch: `# Product
 Name: Fluxboard
-One-liner: AI command center for cross-functional product launches.
-Audience: startup operators, growth leads, and founders.
+One-liner: AI launch system for startup operators shipping multi-channel releases.
+Audience: founders, launch leads, and product marketers.
 
 ## Goals
-- Communicate value in under 5 seconds.
-- Push users toward starting a launch checklist.
-- Feel premium, intelligent, and trustworthy.
+- Make the product understandable in under 5 seconds.
+- Push users toward starting a launch board.
+- Feel sharp, modern, and high-trust.
 
 ## Tone
-- calm
-- sharp
-- futuristic
+- precise
+- modern
+- fast
 - credible
 
 ## Navigation
-- Overview
+- Product
 - Templates
-- Benchmarks
+- Signals
 - Pricing
 
 ## Hero
-Headline: Launch campaigns with an AI operating system.
-Body: Bring research, messaging, design tokens, and launch tasks into one agent-ready workspace.
-Primary CTA: Start free
-Secondary CTA: View live board
-Tag: Weekly ship inspired by new agent workflows
+Headline: Launch with an agent system, not a messy checklist.
+Body: Bring research, design direction, messaging, and rollout tasks into one workspace your team and agents can execute from.
+Primary CTA: Start launch board
+Secondary CTA: View live workflow
+Tag: K2.6-inspired product surface
 
 ## Tokens
-Primary: #76E4FF
-Secondary: #8B5CF6
-Background: #08111D
-Surface: #101B2D
-Text: #EEF4FF
-Muted: #9FB0CC
-Accent: #4ADE80
+Primary: #7C85FF
+Secondary: #A6ADFF
+Background: #06070B
+Surface: #11131A
+Text: #F4F7FB
+Muted: #98A1B2
+Accent: #39D98A
 
 ## Accessibility
-- Maintain at least 4.5 contrast ratio for text against background and surface.
-- Use buttons with visible focus and no low-contrast body copy.
+- Maintain at least 4.5 contrast ratio for body text on every surface.
+- Keep CTA buttons clearly separated from passive secondary actions.
+- Use text labels in addition to color for system states.
 
 ## Components
-- sticky nav
-- gradient hero panel
-- token swatches
-- trust strip
-- two CTA buttons
+- command nav
+- launch hero
+- proof rail
+- token cards
+- action bar
 
 ## Notes
-- Emphasize that the system is both human-readable and agent-readable.
-- Mention that the workflow can hand off directly into a coding agent.`,
-      dashboard: `# Product
+- Position the product as a real operator tool, not an experiment.
+- Visual tone should feel sharper than a typical AI landing page.`,
+      security: `# Product
 Name: Agent Sentinel
-One-liner: Secure production agents with policy-aware request inspection.
-Audience: platform engineers and AI product teams.
+One-liner: Runtime guardrails and policy review for autonomous production agents.
+Audience: AI platform engineers and security-minded product teams.
 
 ## Goals
-- Surface agent risk clearly.
-- Make policy status obvious within one glance.
-- Balance speed and safety.
+- Make risk and policy state obvious immediately.
+- Communicate technical depth without visual clutter.
+- Feel like a serious operator console.
 
 ## Tone
 - technical
-- minimal
+- strict
+- controlled
 - confident
-- operational
 
 ## Navigation
 - Overview
@@ -631,50 +830,50 @@ Audience: platform engineers and AI product teams.
 - Incidents
 
 ## Hero
-Headline: Watch every agent action before it ships risk.
-Body: Combine audit trails, token-level summaries, and clear approval states in a dark command-center UI.
+Headline: Watch every agent action before it becomes a production incident.
+Body: Review traces, blocked requests, and policy violations in one control surface built for agent-era operations.
 Primary CTA: Review policies
 Secondary CTA: Open incident feed
-Tag: Inspired by the new wave of agent security tooling
+Tag: Infrastructure-grade agent safety
 
 ## Tokens
-Primary: #4ADE80
-Secondary: #F59E0B
-Background: #071018
-Surface: #101926
-Text: #E6F1FF
-Muted: #93A4C1
-Accent: #F97316
+Primary: #8B92FF
+Secondary: #D6DAFF
+Background: #05060A
+Surface: #10131A
+Text: #F5F7FC
+Muted: #919BB0
+Accent: #FFB84D
 
 ## Accessibility
-- Highlight warnings using both color and labels.
-- Keep body text high contrast on every card.
+- Warnings must use labels and icons, not color alone.
+- Keep all diagnostic text readable at dashboard density.
 
 ## Components
-- alert rail
-- metrics cards
+- incident rail
+- metrics strip
+- trace panel
 - policy table
-- trace timeline
-- status badges
+- state pills
 
 ## Notes
-- Feels like a safety product, not a consumer app.
-- Visual hierarchy should make anomalies stand out immediately.`,
+- Feels closer to a serious infra product than a consumer SaaS page.
+- Highlight system clarity over decorative gradients.`,
       mobile: `# Product
 Name: Aura Coach
-One-liner: Personal AI coach for habit loops and recovery.
-Audience: ambitious students and solo founders.
+One-liner: Personal AI coach for daily momentum, recovery, and focus loops.
+Audience: ambitious students and solo builders.
 
 ## Goals
-- Feel motivating instead of clinical.
 - Make the first action obvious.
-- Support micro-check-ins in seconds.
+- Feel warm but still premium.
+- Support fast daily check-ins.
 
 ## Tone
-- warm
-- energetic
-- optimistic
 - focused
+- warm
+- optimistic
+- clean
 
 ## Navigation
 - Today
@@ -683,39 +882,39 @@ Audience: ambitious students and solo founders.
 - Library
 
 ## Hero
-Headline: Tiny check-ins. Big momentum.
-Body: Give users a lightweight daily rhythm with one key action, one reflection, and one motivational nudge.
+Headline: Tiny check-ins. Clearer momentum.
+Body: Build a daily rhythm with one key action, one reflection, and one adaptive coaching prompt.
 Primary CTA: Start check-in
-Secondary CTA: See streak plan
-Tag: Mobile-first product surface
+Secondary CTA: See weekly plan
+Tag: Mobile-first coaching surface
 
 ## Tokens
-Primary: #FB7185
-Secondary: #A78BFA
-Background: #140D1F
-Surface: #241734
-Text: #FFF1F7
-Muted: #CBB7D8
-Accent: #FBBF24
+Primary: #8D86FF
+Secondary: #FFBED8
+Background: #090811
+Surface: #161423
+Text: #FAF6FF
+Muted: #B3ACC7
+Accent: #F6C453
 
 ## Accessibility
-- Keep touch targets large and obvious.
-- Do not rely on color alone for streak state.
+- Keep touch targets large and visually obvious.
+- Never rely on color alone to show streak state.
 
 ## Components
-- tab bar
-- progress ring
-- daily card
+- mobile hero
+- progress cards
 - coach prompt
-- reflection sheet
+- streak meter
+- bottom nav
 
 ## Notes
-- Layout should look great in a phone mockup.
-- Emotional tone matters as much as raw information density.`
+- Keep it polished and emotionally intelligent.
+- More premium product, less cute app demo.`
     };
 
-    const requiredSections = ['# Product', '## Goals', '## Tone', '## Navigation', '## Hero', '## Tokens', '## Accessibility', '## Components'];
-    const tokenNames = ['Primary', 'Secondary', 'Background', 'Surface', 'Text', 'Muted', 'Accent'];
+    const requiredSections = ['# Product','## Goals','## Tone','## Navigation','## Hero','## Tokens','## Accessibility','## Components'];
+    const tokenNames = ['Primary','Secondary','Background','Surface','Text','Muted','Accent'];
 
     const editor = document.getElementById('editor');
     const templateRow = document.getElementById('templateRow');
@@ -725,39 +924,42 @@ Accent: #FBBF24
     const coverageScore = document.getElementById('coverageScore');
     const tokenScore = document.getElementById('tokenScore');
     const contrastScore = document.getElementById('contrastScore');
-    const summaryPills = document.getElementById('summaryPills');
     const auditList = document.getElementById('auditList');
-    const previewTop = document.getElementById('previewTop');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewDescription = document.getElementById('previewDescription');
+    const insightList = document.getElementById('insightList');
+    const summaryPills = document.getElementById('summaryPills');
+    const previewTags = document.getElementById('previewTags');
+    const brandDot = document.getElementById('brandDot');
     const brandName = document.getElementById('brandName');
-    const fakeLinks = document.getElementById('fakeLinks');
-    const previewTag = document.getElementById('previewTag');
+    const navLinks = document.getElementById('navLinks');
+    const previewBadge = document.getElementById('previewBadge');
     const heroHeadline = document.getElementById('heroHeadline');
     const heroBody = document.getElementById('heroBody');
     const primaryCta = document.getElementById('primaryCta');
     const secondaryCta = document.getElementById('secondaryCta');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDescription = document.getElementById('previewDescription');
     const tokenGrid = document.getElementById('tokenGrid');
     const previewNotes = document.getElementById('previewNotes');
-    const logoDot = document.getElementById('logoDot');
+    const productMain = document.getElementById('productMain');
+    const heroCard = document.getElementById('heroCard');
 
-    let currentTemplateKey = 'landing';
+    let currentTemplateKey = 'launch';
 
     function createTemplateButtons() {
-      const buttons = [
-        ['landing', 'Launch page template'],
-        ['dashboard', 'Agent security dashboard'],
-        ['mobile', 'Mobile app concept']
+      const buttonDefs = [
+        ['launch', 'Launch system'],
+        ['security', 'Agent security'],
+        ['mobile', 'Mobile coaching']
       ];
-      buttons.forEach(([key, label]) => {
+      buttonDefs.forEach(([key, label]) => {
         const button = document.createElement('button');
         button.textContent = label;
-        if (key === currentTemplateKey) button.classList.add('primary');
+        if (key === currentTemplateKey) button.classList.add('button-primary');
         button.addEventListener('click', () => {
           currentTemplateKey = key;
           editor.value = templates[key];
-          [...templateRow.querySelectorAll('button')].forEach(btn => btn.classList.remove('primary'));
-          button.classList.add('primary');
+          [...templateRow.querySelectorAll('button')].forEach(btn => btn.classList.remove('button-primary'));
+          button.classList.add('button-primary');
           analyze();
         });
         templateRow.appendChild(button);
@@ -765,20 +967,19 @@ Accent: #FBBF24
     }
 
     function parseSpec(text) {
-      const lines = text.split('\n');
       const data = {
-        name: 'Untitled concept',
-        oneLiner: 'No one-liner provided yet.',
+        name: 'Untitled product',
+        oneLiner: 'A concise one-liner helps agents choose stronger layouts.',
         audience: 'Audience not specified.',
         goals: [],
         tone: [],
         navigation: [],
         hero: {
-          headline: 'A clear hero headline helps an agent make better layout choices.',
-          body: 'Describe the core value proposition and desired emotional tone.',
-          primary: 'Primary action',
-          secondary: 'Secondary action',
-          tag: 'Tagline'
+          headline: 'State the product value clearly.',
+          body: 'Describe what the product does and why someone should care.',
+          primary: 'Primary CTA',
+          secondary: 'Secondary CTA',
+          tag: 'Product tag'
         },
         tokens: {},
         accessibility: [],
@@ -787,24 +988,21 @@ Accent: #FBBF24
       };
 
       let section = 'top';
-      for (const rawLine of lines) {
+      for (const rawLine of text.split('\n')) {
         const line = rawLine.trim();
         if (!line) continue;
         if (line.startsWith('## ')) {
           section = line.slice(3).trim().toLowerCase();
           continue;
         }
-        if (line.startsWith('# ')) {
-          continue;
-        }
+        if (line.startsWith('# ')) continue;
+
         if (section === 'top') {
           if (line.startsWith('Name:')) data.name = line.slice(5).trim();
           if (line.startsWith('One-liner:')) data.oneLiner = line.slice(10).trim();
           if (line.startsWith('Audience:')) data.audience = line.slice(9).trim();
-        } else if (section === 'goals' || section === 'tone' || section === 'navigation' || section === 'accessibility' || section === 'components' || section === 'notes') {
-          if (line.startsWith('- ')) {
-            data[section].push(line.slice(2).trim());
-          }
+        } else if (['goals','tone','navigation','accessibility','components','notes'].includes(section)) {
+          if (line.startsWith('- ')) data[section].push(line.slice(2).trim());
         } else if (section === 'hero') {
           if (line.startsWith('Headline:')) data.hero.headline = line.slice(9).trim();
           if (line.startsWith('Body:')) data.hero.body = line.slice(5).trim();
@@ -820,163 +1018,198 @@ Accent: #FBBF24
     }
 
     function hexToRgb(hex) {
-      const clean = hex.replace('#', '');
+      const clean = hex.replace('#','');
       const value = parseInt(clean, 16);
-      return {
-        r: (value >> 16) & 255,
-        g: (value >> 8) & 255,
-        b: value & 255
-      };
+      return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
     }
 
     function luminance(hex) {
       const { r, g, b } = hexToRgb(hex);
-      const rgb = [r, g, b].map(v => {
+      const values = [r, g, b].map(v => {
         const channel = v / 255;
         return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
       });
-      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+      return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
     }
 
-    function contrastRatio(fg, bg) {
-      const l1 = luminance(fg);
-      const l2 = luminance(bg);
+    function contrastRatio(a, b) {
+      const l1 = luminance(a);
+      const l2 = luminance(b);
       const lighter = Math.max(l1, l2);
       const darker = Math.min(l1, l2);
       return (lighter + 0.05) / (darker + 0.05);
     }
 
     function buildAudit(spec, text) {
-      const items = [];
       const foundSections = requiredSections.filter(section => text.includes(section));
       const missingSections = requiredSections.filter(section => !text.includes(section));
-      const sectionCoverage = Math.round((foundSections.length / requiredSections.length) * 100);
-      items.push({
-        level: missingSections.length === 0 ? 'good' : 'warn',
-        title: missingSections.length === 0 ? 'All key sections present' : 'Missing recommended sections',
-        detail: missingSections.length === 0 ? 'Your DESIGN.md covers the core areas an agent needs for layout and styling decisions.' : missingSections.join(', ')
-      });
-
       const foundTokens = tokenNames.filter(name => spec.tokens[name]);
-      items.push({
-        level: foundTokens.length >= 6 ? 'good' : foundTokens.length >= 4 ? 'warn' : 'bad',
-        title: 'Design token coverage',
-        detail: `${foundTokens.length} of ${tokenNames.length} recommended tokens detected.`
-      });
-
-      items.push({
-        level: spec.accessibility.length > 0 ? 'good' : 'bad',
-        title: 'Accessibility guidance',
-        detail: spec.accessibility.length > 0 ? spec.accessibility.join(' ') : 'Add accessibility rules so agents understand constraints, not just style.'
-      });
-
-      items.push({
-        level: spec.goals.length >= 2 ? 'good' : 'warn',
-        title: 'Product goals clarity',
-        detail: spec.goals.length >= 2 ? spec.goals.join(' ') : 'Add at least two concrete goals so the output does not drift into generic design.'
-      });
-
-      items.push({
-        level: spec.hero.headline.length > 18 && spec.hero.body.length > 40 ? 'good' : 'warn',
-        title: 'Hero definition',
-        detail: spec.hero.headline.length > 18 && spec.hero.body.length > 40 ? 'Hero messaging is specific enough to drive a convincing preview.' : 'Clarify the hero headline and body for a stronger first-screen concept.'
-      });
 
       const ratios = [];
-      if (spec.tokens.Text && spec.tokens.Background) ratios.push({ label: 'Text on Background', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Background) });
-      if (spec.tokens.Text && spec.tokens.Surface) ratios.push({ label: 'Text on Surface', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Surface) });
-      if (spec.tokens.Primary && spec.tokens.Background) ratios.push({ label: 'Primary on Background', ratio: contrastRatio(spec.tokens.Primary, spec.tokens.Background) });
-      const passing = ratios.filter(item => item.ratio >= 4.5);
-      items.push({
-        level: ratios.length && passing.length === ratios.length ? 'good' : ratios.length && passing.length >= 1 ? 'warn' : 'bad',
-        title: 'Contrast audit',
-        detail: ratios.length ? ratios.map(item => `${item.label}: ${item.ratio.toFixed(2)}:1`).join(' • ') : 'Add color tokens to run automated contrast checks.'
-      });
+      if (spec.tokens.Text && spec.tokens.Background) ratios.push({ label: 'Text/Background', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Background) });
+      if (spec.tokens.Text && spec.tokens.Surface) ratios.push({ label: 'Text/Surface', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Surface) });
+      if (spec.tokens.Primary && spec.tokens.Background) ratios.push({ label: 'Primary/Background', ratio: contrastRatio(spec.tokens.Primary, spec.tokens.Background) });
 
-      return { items, sectionCoverage, foundTokens: foundTokens.length, contrastPassing: passing.length, contrastTotal: ratios.length, ratios };
+      const items = [
+        {
+          level: missingSections.length === 0 ? 'good' : 'warn',
+          title: missingSections.length === 0 ? 'Structure is complete' : 'Missing key sections',
+          detail: missingSections.length === 0 ? 'This spec covers the core sections an execution agent needs.' : missingSections.join(', ')
+        },
+        {
+          level: foundTokens.length >= 6 ? 'good' : foundTokens.length >= 4 ? 'warn' : 'bad',
+          title: 'Token coverage',
+          detail: `${foundTokens.length} of ${tokenNames.length} recommended token fields detected.`
+        },
+        {
+          level: spec.goals.length >= 2 ? 'good' : 'warn',
+          title: 'Goal clarity',
+          detail: spec.goals.length >= 2 ? spec.goals.join(' ') : 'Add at least two explicit goals so the agent has direction, not just style.'
+        },
+        {
+          level: spec.accessibility.length ? 'good' : 'bad',
+          title: 'Accessibility rules',
+          detail: spec.accessibility.length ? spec.accessibility.join(' ') : 'Accessibility guidance is missing.'
+        },
+        {
+          level: ratios.length && ratios.every(item => item.ratio >= 4.5) ? 'good' : ratios.some(item => item.ratio >= 4.5) ? 'warn' : 'bad',
+          title: 'Contrast audit',
+          detail: ratios.length ? ratios.map(item => `${item.label} ${item.ratio.toFixed(2)}:1`).join(' • ') : 'Add tokens to compute contrast checks.'
+        }
+      ];
+
+      const insights = [
+        {
+          title: 'Audience signal',
+          detail: spec.audience
+        },
+        {
+          title: 'Tone signal',
+          detail: spec.tone.length ? spec.tone.join(', ') : 'Tone not specified yet.'
+        },
+        {
+          title: 'Component signal',
+          detail: spec.components.length ? spec.components.join(', ') : 'No components specified yet.'
+        }
+      ];
+
+      return {
+        items,
+        insights,
+        sectionCoverage: Math.round((foundSections.length / requiredSections.length) * 100),
+        foundTokens: foundTokens.length,
+        contrastPassing: ratios.filter(item => item.ratio >= 4.5).length,
+        contrastTotal: ratios.length,
+        ratios
+      };
     }
 
     function renderPills(audit) {
       summaryPills.innerHTML = '';
       const pillData = [
-        { text: `${audit.sectionCoverage}% structure coverage`, level: audit.sectionCoverage >= 90 ? 'good' : audit.sectionCoverage >= 60 ? 'warn' : 'bad' },
+        { text: `${audit.sectionCoverage}% structure`, level: audit.sectionCoverage >= 90 ? 'good' : audit.sectionCoverage >= 60 ? 'warn' : 'bad' },
         { text: `${audit.foundTokens} tokens`, level: audit.foundTokens >= 6 ? 'good' : audit.foundTokens >= 4 ? 'warn' : 'bad' },
-        { text: `${audit.contrastPassing}/${audit.contrastTotal || 0} contrast checks`, level: audit.contrastTotal && audit.contrastPassing === audit.contrastTotal ? 'good' : audit.contrastPassing ? 'warn' : 'bad' }
+        { text: `${audit.contrastPassing}/${audit.contrastTotal || 0} contrast`, level: audit.contrastTotal && audit.contrastPassing === audit.contrastTotal ? 'good' : audit.contrastPassing ? 'warn' : 'bad' }
       ];
       pillData.forEach(item => {
-        const pill = document.createElement('div');
-        pill.className = `pill ${item.level}`;
-        pill.textContent = item.text;
-        summaryPills.appendChild(pill);
+        const el = document.createElement('div');
+        el.className = `pill ${item.level}`;
+        el.textContent = item.text;
+        summaryPills.appendChild(el);
       });
     }
 
-    function renderAuditList(audit) {
+    function renderAudit(audit) {
       auditList.innerHTML = '';
       audit.items.forEach(item => {
         const li = document.createElement('li');
         li.className = 'audit-item';
+        li.style.borderColor = item.level === 'good' ? 'rgba(57,217,138,0.22)' : item.level === 'warn' ? 'rgba(255,184,77,0.22)' : 'rgba(255,111,127,0.22)';
         li.innerHTML = `<strong>${item.title}</strong><span>${item.detail}</span>`;
-        li.style.borderColor = item.level === 'good' ? 'rgba(81, 211, 156, 0.22)' : item.level === 'warn' ? 'rgba(255, 206, 106, 0.22)' : 'rgba(255, 125, 125, 0.22)';
         auditList.appendChild(li);
+      });
+
+      insightList.innerHTML = '';
+      audit.insights.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'insight-item';
+        li.innerHTML = `<strong>${item.title}</strong><span>${item.detail}</span>`;
+        insightList.appendChild(li);
       });
     }
 
+    function readableOn(bg) {
+      return contrastRatio(bg, '#061018') > contrastRatio(bg, '#FFFFFF') ? '#061018' : '#FFFFFF';
+    }
+
     function renderPreview(spec, audit) {
-      previewTitle.textContent = spec.name;
-      previewDescription.textContent = spec.oneLiner;
-      brandName.textContent = spec.name.split(' ').slice(0, 2).join(' ') || 'Spec';
-      previewTag.textContent = spec.hero.tag || 'Agent-ready handoff';
+      const background = spec.tokens.Background || '#06070B';
+      const surface = spec.tokens.Surface || '#11131A';
+      const text = spec.tokens.Text || '#F4F7FB';
+      const muted = spec.tokens.Muted || '#98A1B2';
+      const primary = spec.tokens.Primary || '#7C85FF';
+      const secondary = spec.tokens.Secondary || '#A6ADFF';
+      const accent = spec.tokens.Accent || '#39D98A';
+
+      brandName.textContent = spec.name;
+      previewBadge.textContent = spec.hero.tag || 'Launch-ready interface';
       heroHeadline.textContent = spec.hero.headline;
       heroBody.textContent = spec.hero.body;
       primaryCta.textContent = spec.hero.primary;
       secondaryCta.textContent = spec.hero.secondary;
+      previewTitle.textContent = spec.name;
+      previewDescription.textContent = spec.oneLiner;
+      brandDot.style.background = primary;
+      brandDot.style.boxShadow = `0 0 18px ${primary}88`;
 
-      const background = spec.tokens.Background || '#08111D';
-      const surface = spec.tokens.Surface || '#101B2D';
-      const text = spec.tokens.Text || '#EEF4FF';
-      const primary = spec.tokens.Primary || '#76E4FF';
-      const secondary = spec.tokens.Secondary || '#8B5CF6';
-      const muted = spec.tokens.Muted || '#9FB0CC';
-      const accent = spec.tokens.Accent || '#4ADE80';
-
-      previewTop.style.background = `linear-gradient(135deg, ${primary}33, ${secondary}30)`;
-      previewTop.style.color = text;
-      document.getElementById('previewBody').style.background = background;
-      document.getElementById('heroCard').style.background = `linear-gradient(180deg, ${surface}, ${background})`;
-      document.getElementById('heroCard').style.color = text;
-      logoDot.style.background = primary;
-      primaryCta.style.background = primary;
-      primaryCta.style.color = contrastRatio(primary, background) >= 4.5 ? background : '#07111F';
-      secondaryCta.style.borderColor = `${secondary}88`;
-      secondaryCta.style.color = text;
-      secondaryCta.style.background = `${secondary}18`;
+      productMain.style.background = background;
+      heroCard.style.background = `linear-gradient(180deg, ${surface}, ${background})`;
+      heroCard.style.color = text;
       heroBody.style.color = muted;
-      previewTag.style.color = background;
-      previewTag.style.background = `${primary}22`;
-      previewTag.style.borderColor = `${primary}55`;
-      fakeLinks.innerHTML = '';
-      (spec.navigation.length ? spec.navigation : ['Overview', 'Specs', 'Audit']).slice(0, 4).forEach(item => {
+      previewBadge.style.background = `${primary}18`;
+      previewBadge.style.borderColor = `${primary}35`;
+      previewBadge.style.color = secondary;
+      primaryCta.style.background = primary;
+      primaryCta.style.borderColor = `${primary}AA`;
+      primaryCta.style.color = readableOn(primary);
+      secondaryCta.style.background = 'rgba(255,255,255,0.03)';
+      secondaryCta.style.borderColor = 'rgba(255,255,255,0.12)';
+      secondaryCta.style.color = text;
+
+      previewTags.innerHTML = '';
+      [
+        spec.audience.split(',')[0].trim(),
+        `${audit.sectionCoverage}% structure`,
+        `${audit.foundTokens} tokens`,
+        audit.contrastTotal ? `${audit.contrastPassing}/${audit.contrastTotal} contrast checks` : 'no contrast data'
+      ].forEach(tag => {
         const chip = document.createElement('div');
-        chip.className = 'fake-link';
+        chip.className = 'product-chip';
+        chip.textContent = tag;
+        previewTags.appendChild(chip);
+      });
+
+      navLinks.innerHTML = '';
+      (spec.navigation.length ? spec.navigation : ['Overview','Templates','Signals']).slice(0,4).forEach(item => {
+        const chip = document.createElement('div');
+        chip.className = 'product-chip';
         chip.textContent = item;
-        chip.style.border = `1px solid ${primary}24`;
-        fakeLinks.appendChild(chip);
+        navLinks.appendChild(chip);
       });
 
       tokenGrid.innerHTML = '';
       [
-        ['Primary', primary, text],
-        ['Secondary', secondary, text],
-        ['Accent', accent, background],
-        ['Surface', surface, text],
-        ['Background', background, text],
-        ['Muted', muted, background]
-      ].forEach(([label, color, textColor]) => {
+        ['Primary', primary],
+        ['Secondary', secondary],
+        ['Accent', accent],
+        ['Surface', surface],
+        ['Background', background],
+        ['Text', text]
+      ].forEach(([label, color]) => {
         const swatch = document.createElement('div');
         swatch.className = 'swatch';
         swatch.style.background = color;
-        swatch.style.color = contrastRatio(color, textColor) >= 3 ? textColor : (contrastRatio(color, '#07111F') > contrastRatio(color, '#FFFFFF') ? '#07111F' : '#FFFFFF');
+        swatch.style.color = readableOn(color);
         swatch.innerHTML = `<strong>${label}</strong><code>${color}</code>`;
         tokenGrid.appendChild(swatch);
       });
@@ -985,37 +1218,36 @@ Accent: #FBBF24
       const notes = [
         `Audience: ${spec.audience}`,
         `Tone: ${(spec.tone.length ? spec.tone : ['not specified']).join(', ')}`,
-        `Core components: ${(spec.components.length ? spec.components : ['components not specified']).join(', ')}`,
-        `Accessibility: ${spec.accessibility.length ? spec.accessibility[0] : 'Add explicit accessibility instructions.'}`,
-        audit.ratios.length ? `Contrast ratios: ${audit.ratios.map(item => `${item.label} ${item.ratio.toFixed(2)}:1`).join(' • ')}` : 'Add token pairs to calculate contrast.'
+        `Components: ${(spec.components.length ? spec.components : ['not specified']).join(', ')}`,
+        `Accessibility rule: ${spec.accessibility[0] || 'Add explicit accessibility constraints.'}`,
+        audit.ratios.length ? `Contrast ratios: ${audit.ratios.map(item => `${item.label} ${item.ratio.toFixed(2)}:1`).join(' • ')}` : 'Contrast checks appear once tokens are defined.'
       ];
       notes.forEach(note => {
         const li = document.createElement('li');
-        li.className = 'audit-item';
+        li.className = 'note-item';
         li.innerHTML = `<strong>Preview note</strong><span>${note}</span>`;
         previewNotes.appendChild(li);
       });
     }
 
     function analyze() {
-      const text = editor.value;
-      const spec = parseSpec(text);
-      const audit = buildAudit(spec, text);
+      const spec = parseSpec(editor.value);
+      const audit = buildAudit(spec, editor.value);
       coverageScore.textContent = `${audit.sectionCoverage}%`;
       tokenScore.textContent = `${audit.foundTokens}`;
       contrastScore.textContent = `${audit.contrastPassing}/${audit.contrastTotal || 0}`;
       renderPills(audit);
-      renderAuditList(audit);
+      renderAudit(audit);
       renderPreview(spec, audit);
     }
 
     downloadBtn.addEventListener('click', () => {
       const blob = new Blob([editor.value], { type: 'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = 'DESIGN.md';
-      anchor.click();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'DESIGN.md';
+      a.click();
       URL.revokeObjectURL(url);
     });
 
@@ -1023,11 +1255,10 @@ Accent: #FBBF24
       try {
         await navigator.clipboard.writeText(editor.value);
         copyBtn.textContent = 'Copied';
-        setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; }, 1400);
-      } catch (error) {
+      } catch (err) {
         copyBtn.textContent = 'Copy failed';
-        setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; }, 1400);
       }
+      setTimeout(() => { copyBtn.textContent = 'Copy spec'; }, 1200);
     });
 
     resetBtn.addEventListener('click', () => {
