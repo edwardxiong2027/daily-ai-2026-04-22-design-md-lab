@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design MD Lab</title>
+  <meta name="description" content="A cutting-edge playground for Google's newly open-sourced DESIGN.md concept: edit agent-readable design specs, lint them, preview tokens, and audit accessibility in the browser." />
+  <style>
+    :root {
+      --bg: #09111f;
+      --bg-soft: rgba(14, 23, 39, 0.82);
+      --panel: rgba(16, 27, 45, 0.86);
+      --panel-strong: #111c30;
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #eef4ff;
+      --muted: #9fb0cc;
+      --accent: #76e4ff;
+      --accent-2: #a78bfa;
+      --good: #51d39c;
+      --warn: #ffce6a;
+      --bad: #ff7d7d;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(118, 228, 255, 0.14), transparent 35%),
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.16), transparent 34%),
+        linear-gradient(180deg, #08101d 0%, #0f1727 45%, #0b1220 100%);
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1420px, calc(100vw - 32px));
+      margin: 24px auto 56px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero, .panel {
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .hero {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.45fr 1fr;
+    }
+
+    .headline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(118, 228, 255, 0.22);
+      background: rgba(118, 228, 255, 0.08);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 4.4rem);
+      line-height: 0.97;
+      letter-spacing: -0.05em;
+    }
+
+    .subhead {
+      margin: 0;
+      max-width: 820px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    .hero-cards {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .mini-card, .info-card {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px;
+    }
+
+    .mini-card strong, .info-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+    }
+
+    .mini-card span, .info-card span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .signal-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .signal-list li {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .signal-list b { color: var(--text); }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .panel p.lead {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .toolbar, .template-row, .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button, .ghost-link {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      text-decoration: none;
+    }
+
+    button:hover, .ghost-link:hover {
+      transform: translateY(-1px);
+      border-color: rgba(118, 228, 255, 0.45);
+      background: rgba(118, 228, 255, 0.08);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(118, 228, 255, 0.28), rgba(167, 139, 250, 0.26));
+      border-color: rgba(118, 228, 255, 0.38);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 540px;
+      resize: vertical;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(3, 8, 18, 0.56);
+      color: var(--text);
+      padding: 18px;
+      font: 14px/1.6 var(--mono);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
+    }
+
+    .right-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .pill.good { color: var(--good); border-color: rgba(81, 211, 156, 0.3); background: rgba(81, 211, 156, 0.08); }
+    .pill.warn { color: var(--warn); border-color: rgba(255, 206, 106, 0.28); background: rgba(255, 206, 106, 0.08); }
+    .pill.bad { color: var(--bad); border-color: rgba(255, 125, 125, 0.28); background: rgba(255, 125, 125, 0.08); }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.45rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .audit-list, .preview-notes {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .audit-item {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.028);
+    }
+
+    .audit-item strong {
+      font-size: 0.94rem;
+    }
+
+    .audit-item span {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.9rem;
+    }
+
+    .preview {
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+    }
+
+    .preview-top {
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(118, 228, 255, 0.16), rgba(167, 139, 250, 0.14));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .preview-top h3 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .preview-top p {
+      margin: 0;
+      color: rgba(238, 244, 255, 0.82);
+      line-height: 1.5;
+    }
+
+    .preview-body {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .fake-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(118, 228, 255, 0.6);
+    }
+
+    .fake-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .fake-link {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.76);
+    }
+
+    .hero-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-card .cta-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cta {
+      border: none;
+      background: var(--accent);
+      color: #07111f;
+      font-weight: 700;
+    }
+
+    .secondary {
+      border-color: rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+    }
+
+    .token-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .swatch {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.09);
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .swatch code {
+      font: 12px var(--mono);
+      opacity: 0.84;
+    }
+
+    .source-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .source-links a {
+      display: block;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      text-decoration: none;
+      line-height: 1.45;
+    }
+
+    .source-links a:hover {
+      color: var(--text);
+      border-color: rgba(118, 228, 255, 0.42);
+    }
+
+    .footer-links {
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .footer-links div { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    @media (max-width: 1100px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .hero-cards, .stats, .token-grid { grid-template-columns: 1fr; }
+      textarea { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="headline">
+        <div class="eyebrow">Fresh concept • agent-readable design specs</div>
+        <h1>Design MD Lab</h1>
+        <p class="subhead">
+          A browser-native playground inspired by Google Stitch's newly open-sourced DESIGN.md format.
+          Write an agent-readable design spec, lint it live, preview the resulting UI direction, and run instant accessibility checks before handing it to a model or coding agent.
+        </p>
+        <div class="hero-cards">
+          <div class="mini-card"><strong>Live linting</strong><span>Find missing sections, weak token coverage, unclear goals, and absent accessibility guidance.</span></div>
+          <div class="mini-card"><strong>Instant preview</strong><span>Turn design tokens and product intent into a visual mockup without leaving the page.</span></div>
+          <div class="mini-card"><strong>WCAG audit</strong><span>Check contrast ratios on core token pairs so agents do not hallucinate inaccessible palettes.</span></div>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="info-card">
+          <strong>Why this exists now</strong>
+          <span>Google opened up the draft DESIGN.md spec so AI systems can reason about design intent instead of guessing from screenshots. This app turns that idea into a practical, shippable workflow.</span>
+        </div>
+        <ul class="signal-list">
+          <li><b>New format:</b> DESIGN.md is positioned as a shared visual language across tools and agents.</li>
+          <li><b>New workflow:</b> Autonomous research and coding agents are expanding fast, so structured handoff artifacts are suddenly valuable.</li>
+          <li><b>New pain point:</b> Teams need human-readable + model-readable design prompts with built-in accessibility safeguards.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="panel">
+        <h2>Spec editor</h2>
+        <p class="lead">Load a starter spec, customize it, then export a polished DESIGN.md file for your own agent stack. The syntax here is intentionally simple and readable.</p>
+        <div class="template-row" id="templateRow"></div>
+        <div class="toolbar" style="margin: 14px 0 16px;">
+          <button class="primary" id="downloadBtn">Download DESIGN.md</button>
+          <button id="copyBtn">Copy to clipboard</button>
+          <button id="resetBtn">Reset to template</button>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </div>
+
+      <div class="right-grid">
+        <div class="panel">
+          <h2>Lint summary</h2>
+          <p class="lead">A quick signal panel for whether your design spec is strong enough for an autonomous agent handoff.</p>
+          <div class="stats">
+            <div class="stat"><strong id="coverageScore">0%</strong><span>Section coverage</span></div>
+            <div class="stat"><strong id="tokenScore">0</strong><span>Design tokens found</span></div>
+            <div class="stat"><strong id="contrastScore">0</strong><span>Contrast checks passed</span></div>
+          </div>
+          <div class="pill-row" id="summaryPills"></div>
+          <ul class="audit-list" id="auditList"></ul>
+        </div>
+
+        <div class="panel">
+          <h2>Agent-ready preview</h2>
+          <p class="lead">A stylized UI preview generated directly from your spec's intent, tone, and core tokens.</p>
+          <div class="preview">
+            <div class="preview-top" id="previewTop">
+              <h3 id="previewTitle">Agent-ready product surface</h3>
+              <p id="previewDescription">Structured intent, visual tokens, and accessibility rules all in one place.</p>
+            </div>
+            <div class="preview-body" id="previewBody">
+              <div class="fake-nav">
+                <div class="logo-badge"><span class="logo-dot" id="logoDot"></span><span id="brandName">SignalFlow</span></div>
+                <div class="fake-links" id="fakeLinks"></div>
+              </div>
+              <div class="hero-card" id="heroCard">
+                <div>
+                  <div class="eyebrow" id="previewTag">Launch-ready concept</div>
+                  <h3 id="heroHeadline">A homepage that explains what the product does in 5 seconds.</h3>
+                  <p id="heroBody">Use clear product positioning, visible trust markers, and buttons that push the user toward the primary action.</p>
+                </div>
+                <div class="cta-row">
+                  <button class="cta" id="primaryCta">Try it now</button>
+                  <button class="secondary" id="secondaryCta">See architecture</button>
+                </div>
+              </div>
+              <div class="token-grid" id="tokenGrid"></div>
+              <ul class="preview-notes" id="previewNotes"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Source signal</h2>
+          <p class="lead">This project follows the newest design-agent workflow signals rather than old generic demo patterns.</p>
+          <div class="source-links">
+            <a href="https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/" target="_blank" rel="noreferrer">Google: Stitch's DESIGN.md draft specification is now open source so agents can understand design intent and validate choices against accessibility rules.</a>
+            <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/" target="_blank" rel="noreferrer">Google: Deep Research and Deep Research Max frame autonomous research agents as a fast-moving product category.</a>
+            <a href="https://www.brex.com/crabtrap" target="_blank" rel="noreferrer">Brex: CrabTrap shows the production push toward agent infrastructure and safer autonomous behavior.</a>
+          </div>
+          <div class="footer-links">
+            <span>Built for a weekly shipped-project cadence focused on new AI interfaces, formats, and workflows.</span>
+            <div>
+              <a class="ghost-link" href="https://github.com/edwardxiong2027" target="_blank" rel="noreferrer">GitHub profile</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const templates = {
+      landing: `# Product
+Name: Fluxboard
+One-liner: AI command center for cross-functional product launches.
+Audience: startup operators, growth leads, and founders.
+
+## Goals
+- Communicate value in under 5 seconds.
+- Push users toward starting a launch checklist.
+- Feel premium, intelligent, and trustworthy.
+
+## Tone
+- calm
+- sharp
+- futuristic
+- credible
+
+## Navigation
+- Overview
+- Templates
+- Benchmarks
+- Pricing
+
+## Hero
+Headline: Launch campaigns with an AI operating system.
+Body: Bring research, messaging, design tokens, and launch tasks into one agent-ready workspace.
+Primary CTA: Start free
+Secondary CTA: View live board
+Tag: Weekly ship inspired by new agent workflows
+
+## Tokens
+Primary: #76E4FF
+Secondary: #8B5CF6
+Background: #08111D
+Surface: #101B2D
+Text: #EEF4FF
+Muted: #9FB0CC
+Accent: #4ADE80
+
+## Accessibility
+- Maintain at least 4.5 contrast ratio for text against background and surface.
+- Use buttons with visible focus and no low-contrast body copy.
+
+## Components
+- sticky nav
+- gradient hero panel
+- token swatches
+- trust strip
+- two CTA buttons
+
+## Notes
+- Emphasize that the system is both human-readable and agent-readable.
+- Mention that the workflow can hand off directly into a coding agent.`,
+      dashboard: `# Product
+Name: Agent Sentinel
+One-liner: Secure production agents with policy-aware request inspection.
+Audience: platform engineers and AI product teams.
+
+## Goals
+- Surface agent risk clearly.
+- Make policy status obvious within one glance.
+- Balance speed and safety.
+
+## Tone
+- technical
+- minimal
+- confident
+- operational
+
+## Navigation
+- Overview
+- Policies
+- Sessions
+- Incidents
+
+## Hero
+Headline: Watch every agent action before it ships risk.
+Body: Combine audit trails, token-level summaries, and clear approval states in a dark command-center UI.
+Primary CTA: Review policies
+Secondary CTA: Open incident feed
+Tag: Inspired by the new wave of agent security tooling
+
+## Tokens
+Primary: #4ADE80
+Secondary: #F59E0B
+Background: #071018
+Surface: #101926
+Text: #E6F1FF
+Muted: #93A4C1
+Accent: #F97316
+
+## Accessibility
+- Highlight warnings using both color and labels.
+- Keep body text high contrast on every card.
+
+## Components
+- alert rail
+- metrics cards
+- policy table
+- trace timeline
+- status badges
+
+## Notes
+- Feels like a safety product, not a consumer app.
+- Visual hierarchy should make anomalies stand out immediately.`,
+      mobile: `# Product
+Name: Aura Coach
+One-liner: Personal AI coach for habit loops and recovery.
+Audience: ambitious students and solo founders.
+
+## Goals
+- Feel motivating instead of clinical.
+- Make the first action obvious.
+- Support micro-check-ins in seconds.
+
+## Tone
+- warm
+- energetic
+- optimistic
+- focused
+
+## Navigation
+- Today
+- Streaks
+- Coach
+- Library
+
+## Hero
+Headline: Tiny check-ins. Big momentum.
+Body: Give users a lightweight daily rhythm with one key action, one reflection, and one motivational nudge.
+Primary CTA: Start check-in
+Secondary CTA: See streak plan
+Tag: Mobile-first product surface
+
+## Tokens
+Primary: #FB7185
+Secondary: #A78BFA
+Background: #140D1F
+Surface: #241734
+Text: #FFF1F7
+Muted: #CBB7D8
+Accent: #FBBF24
+
+## Accessibility
+- Keep touch targets large and obvious.
+- Do not rely on color alone for streak state.
+
+## Components
+- tab bar
+- progress ring
+- daily card
+- coach prompt
+- reflection sheet
+
+## Notes
+- Layout should look great in a phone mockup.
+- Emotional tone matters as much as raw information density.`
+    };
+
+    const requiredSections = ['# Product', '## Goals', '## Tone', '## Navigation', '## Hero', '## Tokens', '## Accessibility', '## Components'];
+    const tokenNames = ['Primary', 'Secondary', 'Background', 'Surface', 'Text', 'Muted', 'Accent'];
+
+    const editor = document.getElementById('editor');
+    const templateRow = document.getElementById('templateRow');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const coverageScore = document.getElementById('coverageScore');
+    const tokenScore = document.getElementById('tokenScore');
+    const contrastScore = document.getElementById('contrastScore');
+    const summaryPills = document.getElementById('summaryPills');
+    const auditList = document.getElementById('auditList');
+    const previewTop = document.getElementById('previewTop');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDescription = document.getElementById('previewDescription');
+    const brandName = document.getElementById('brandName');
+    const fakeLinks = document.getElementById('fakeLinks');
+    const previewTag = document.getElementById('previewTag');
+    const heroHeadline = document.getElementById('heroHeadline');
+    const heroBody = document.getElementById('heroBody');
+    const primaryCta = document.getElementById('primaryCta');
+    const secondaryCta = document.getElementById('secondaryCta');
+    const tokenGrid = document.getElementById('tokenGrid');
+    const previewNotes = document.getElementById('previewNotes');
+    const logoDot = document.getElementById('logoDot');
+
+    let currentTemplateKey = 'landing';
+
+    function createTemplateButtons() {
+      const buttons = [
+        ['landing', 'Launch page template'],
+        ['dashboard', 'Agent security dashboard'],
+        ['mobile', 'Mobile app concept']
+      ];
+      buttons.forEach(([key, label]) => {
+        const button = document.createElement('button');
+        button.textContent = label;
+        if (key === currentTemplateKey) button.classList.add('primary');
+        button.addEventListener('click', () => {
+          currentTemplateKey = key;
+          editor.value = templates[key];
+          [...templateRow.querySelectorAll('button')].forEach(btn => btn.classList.remove('primary'));
+          button.classList.add('primary');
+          analyze();
+        });
+        templateRow.appendChild(button);
+      });
+    }
+
+    function parseSpec(text) {
+      const lines = text.split('\n');
+      const data = {
+        name: 'Untitled concept',
+        oneLiner: 'No one-liner provided yet.',
+        audience: 'Audience not specified.',
+        goals: [],
+        tone: [],
+        navigation: [],
+        hero: {
+          headline: 'A clear hero headline helps an agent make better layout choices.',
+          body: 'Describe the core value proposition and desired emotional tone.',
+          primary: 'Primary action',
+          secondary: 'Secondary action',
+          tag: 'Tagline'
+        },
+        tokens: {},
+        accessibility: [],
+        components: [],
+        notes: []
+      };
+
+      let section = 'top';
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) continue;
+        if (line.startsWith('## ')) {
+          section = line.slice(3).trim().toLowerCase();
+          continue;
+        }
+        if (line.startsWith('# ')) {
+          continue;
+        }
+        if (section === 'top') {
+          if (line.startsWith('Name:')) data.name = line.slice(5).trim();
+          if (line.startsWith('One-liner:')) data.oneLiner = line.slice(10).trim();
+          if (line.startsWith('Audience:')) data.audience = line.slice(9).trim();
+        } else if (section === 'goals' || section === 'tone' || section === 'navigation' || section === 'accessibility' || section === 'components' || section === 'notes') {
+          if (line.startsWith('- ')) {
+            data[section].push(line.slice(2).trim());
+          }
+        } else if (section === 'hero') {
+          if (line.startsWith('Headline:')) data.hero.headline = line.slice(9).trim();
+          if (line.startsWith('Body:')) data.hero.body = line.slice(5).trim();
+          if (line.startsWith('Primary CTA:')) data.hero.primary = line.slice(12).trim();
+          if (line.startsWith('Secondary CTA:')) data.hero.secondary = line.slice(14).trim();
+          if (line.startsWith('Tag:')) data.hero.tag = line.slice(4).trim();
+        } else if (section === 'tokens') {
+          const match = line.match(/^([A-Za-z]+):\s*(#[0-9A-Fa-f]{6})$/);
+          if (match) data.tokens[match[1]] = match[2].toUpperCase();
+        }
+      }
+      return data;
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace('#', '');
+      const value = parseInt(clean, 16);
+      return {
+        r: (value >> 16) & 255,
+        g: (value >> 8) & 255,
+        b: value & 255
+      };
+    }
+
+    function luminance(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      const rgb = [r, g, b].map(v => {
+        const channel = v / 255;
+        return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+    }
+
+    function contrastRatio(fg, bg) {
+      const l1 = luminance(fg);
+      const l2 = luminance(bg);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function buildAudit(spec, text) {
+      const items = [];
+      const foundSections = requiredSections.filter(section => text.includes(section));
+      const missingSections = requiredSections.filter(section => !text.includes(section));
+      const sectionCoverage = Math.round((foundSections.length / requiredSections.length) * 100);
+      items.push({
+        level: missingSections.length === 0 ? 'good' : 'warn',
+        title: missingSections.length === 0 ? 'All key sections present' : 'Missing recommended sections',
+        detail: missingSections.length === 0 ? 'Your DESIGN.md covers the core areas an agent needs for layout and styling decisions.' : missingSections.join(', ')
+      });
+
+      const foundTokens = tokenNames.filter(name => spec.tokens[name]);
+      items.push({
+        level: foundTokens.length >= 6 ? 'good' : foundTokens.length >= 4 ? 'warn' : 'bad',
+        title: 'Design token coverage',
+        detail: `${foundTokens.length} of ${tokenNames.length} recommended tokens detected.`
+      });
+
+      items.push({
+        level: spec.accessibility.length > 0 ? 'good' : 'bad',
+        title: 'Accessibility guidance',
+        detail: spec.accessibility.length > 0 ? spec.accessibility.join(' ') : 'Add accessibility rules so agents understand constraints, not just style.'
+      });
+
+      items.push({
+        level: spec.goals.length >= 2 ? 'good' : 'warn',
+        title: 'Product goals clarity',
+        detail: spec.goals.length >= 2 ? spec.goals.join(' ') : 'Add at least two concrete goals so the output does not drift into generic design.'
+      });
+
+      items.push({
+        level: spec.hero.headline.length > 18 && spec.hero.body.length > 40 ? 'good' : 'warn',
+        title: 'Hero definition',
+        detail: spec.hero.headline.length > 18 && spec.hero.body.length > 40 ? 'Hero messaging is specific enough to drive a convincing preview.' : 'Clarify the hero headline and body for a stronger first-screen concept.'
+      });
+
+      const ratios = [];
+      if (spec.tokens.Text && spec.tokens.Background) ratios.push({ label: 'Text on Background', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Background) });
+      if (spec.tokens.Text && spec.tokens.Surface) ratios.push({ label: 'Text on Surface', ratio: contrastRatio(spec.tokens.Text, spec.tokens.Surface) });
+      if (spec.tokens.Primary && spec.tokens.Background) ratios.push({ label: 'Primary on Background', ratio: contrastRatio(spec.tokens.Primary, spec.tokens.Background) });
+      const passing = ratios.filter(item => item.ratio >= 4.5);
+      items.push({
+        level: ratios.length && passing.length === ratios.length ? 'good' : ratios.length && passing.length >= 1 ? 'warn' : 'bad',
+        title: 'Contrast audit',
+        detail: ratios.length ? ratios.map(item => `${item.label}: ${item.ratio.toFixed(2)}:1`).join(' • ') : 'Add color tokens to run automated contrast checks.'
+      });
+
+      return { items, sectionCoverage, foundTokens: foundTokens.length, contrastPassing: passing.length, contrastTotal: ratios.length, ratios };
+    }
+
+    function renderPills(audit) {
+      summaryPills.innerHTML = '';
+      const pillData = [
+        { text: `${audit.sectionCoverage}% structure coverage`, level: audit.sectionCoverage >= 90 ? 'good' : audit.sectionCoverage >= 60 ? 'warn' : 'bad' },
+        { text: `${audit.foundTokens} tokens`, level: audit.foundTokens >= 6 ? 'good' : audit.foundTokens >= 4 ? 'warn' : 'bad' },
+        { text: `${audit.contrastPassing}/${audit.contrastTotal || 0} contrast checks`, level: audit.contrastTotal && audit.contrastPassing === audit.contrastTotal ? 'good' : audit.contrastPassing ? 'warn' : 'bad' }
+      ];
+      pillData.forEach(item => {
+        const pill = document.createElement('div');
+        pill.className = `pill ${item.level}`;
+        pill.textContent = item.text;
+        summaryPills.appendChild(pill);
+      });
+    }
+
+    function renderAuditList(audit) {
+      auditList.innerHTML = '';
+      audit.items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'audit-item';
+        li.innerHTML = `<strong>${item.title}</strong><span>${item.detail}</span>`;
+        li.style.borderColor = item.level === 'good' ? 'rgba(81, 211, 156, 0.22)' : item.level === 'warn' ? 'rgba(255, 206, 106, 0.22)' : 'rgba(255, 125, 125, 0.22)';
+        auditList.appendChild(li);
+      });
+    }
+
+    function renderPreview(spec, audit) {
+      previewTitle.textContent = spec.name;
+      previewDescription.textContent = spec.oneLiner;
+      brandName.textContent = spec.name.split(' ').slice(0, 2).join(' ') || 'Spec';
+      previewTag.textContent = spec.hero.tag || 'Agent-ready handoff';
+      heroHeadline.textContent = spec.hero.headline;
+      heroBody.textContent = spec.hero.body;
+      primaryCta.textContent = spec.hero.primary;
+      secondaryCta.textContent = spec.hero.secondary;
+
+      const background = spec.tokens.Background || '#08111D';
+      const surface = spec.tokens.Surface || '#101B2D';
+      const text = spec.tokens.Text || '#EEF4FF';
+      const primary = spec.tokens.Primary || '#76E4FF';
+      const secondary = spec.tokens.Secondary || '#8B5CF6';
+      const muted = spec.tokens.Muted || '#9FB0CC';
+      const accent = spec.tokens.Accent || '#4ADE80';
+
+      previewTop.style.background = `linear-gradient(135deg, ${primary}33, ${secondary}30)`;
+      previewTop.style.color = text;
+      document.getElementById('previewBody').style.background = background;
+      document.getElementById('heroCard').style.background = `linear-gradient(180deg, ${surface}, ${background})`;
+      document.getElementById('heroCard').style.color = text;
+      logoDot.style.background = primary;
+      primaryCta.style.background = primary;
+      primaryCta.style.color = contrastRatio(primary, background) >= 4.5 ? background : '#07111F';
+      secondaryCta.style.borderColor = `${secondary}88`;
+      secondaryCta.style.color = text;
+      secondaryCta.style.background = `${secondary}18`;
+      heroBody.style.color = muted;
+      previewTag.style.color = background;
+      previewTag.style.background = `${primary}22`;
+      previewTag.style.borderColor = `${primary}55`;
+      fakeLinks.innerHTML = '';
+      (spec.navigation.length ? spec.navigation : ['Overview', 'Specs', 'Audit']).slice(0, 4).forEach(item => {
+        const chip = document.createElement('div');
+        chip.className = 'fake-link';
+        chip.textContent = item;
+        chip.style.border = `1px solid ${primary}24`;
+        fakeLinks.appendChild(chip);
+      });
+
+      tokenGrid.innerHTML = '';
+      [
+        ['Primary', primary, text],
+        ['Secondary', secondary, text],
+        ['Accent', accent, background],
+        ['Surface', surface, text],
+        ['Background', background, text],
+        ['Muted', muted, background]
+      ].forEach(([label, color, textColor]) => {
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch';
+        swatch.style.background = color;
+        swatch.style.color = contrastRatio(color, textColor) >= 3 ? textColor : (contrastRatio(color, '#07111F') > contrastRatio(color, '#FFFFFF') ? '#07111F' : '#FFFFFF');
+        swatch.innerHTML = `<strong>${label}</strong><code>${color}</code>`;
+        tokenGrid.appendChild(swatch);
+      });
+
+      previewNotes.innerHTML = '';
+      const notes = [
+        `Audience: ${spec.audience}`,
+        `Tone: ${(spec.tone.length ? spec.tone : ['not specified']).join(', ')}`,
+        `Core components: ${(spec.components.length ? spec.components : ['components not specified']).join(', ')}`,
+        `Accessibility: ${spec.accessibility.length ? spec.accessibility[0] : 'Add explicit accessibility instructions.'}`,
+        audit.ratios.length ? `Contrast ratios: ${audit.ratios.map(item => `${item.label} ${item.ratio.toFixed(2)}:1`).join(' • ')}` : 'Add token pairs to calculate contrast.'
+      ];
+      notes.forEach(note => {
+        const li = document.createElement('li');
+        li.className = 'audit-item';
+        li.innerHTML = `<strong>Preview note</strong><span>${note}</span>`;
+        previewNotes.appendChild(li);
+      });
+    }
+
+    function analyze() {
+      const text = editor.value;
+      const spec = parseSpec(text);
+      const audit = buildAudit(spec, text);
+      coverageScore.textContent = `${audit.sectionCoverage}%`;
+      tokenScore.textContent = `${audit.foundTokens}`;
+      contrastScore.textContent = `${audit.contrastPassing}/${audit.contrastTotal || 0}`;
+      renderPills(audit);
+      renderAuditList(audit);
+      renderPreview(spec, audit);
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([editor.value], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'DESIGN.md';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; }, 1400);
+      } catch (error) {
+        copyBtn.textContent = 'Copy failed';
+        setTimeout(() => { copyBtn.textContent = 'Copy to clipboard'; }, 1400);
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      editor.value = templates[currentTemplateKey];
+      analyze();
+    });
+
+    editor.addEventListener('input', analyze);
+
+    createTemplateButtons();
+    editor.value = templates[currentTemplateKey];
+    analyze();
+  </script>
+</body>
+</html>
