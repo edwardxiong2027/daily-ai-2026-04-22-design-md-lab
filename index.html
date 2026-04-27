@@ -8,25 +8,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #06070b;
-      --bg-2: #0b0d12;
-      --panel: rgba(255,255,255,0.03);
-      --panel-2: rgba(255,255,255,0.045);
-      --panel-3: rgba(255,255,255,0.065);
-      --line: rgba(255,255,255,0.09);
-      --line-2: rgba(255,255,255,0.16);
-      --text: #f4f7fb;
-      --text-2: #c8d1dc;
-      --text-3: #8891a1;
-      --accent: #7c85ff;
-      --accent-2: #9ea5ff;
-      --accent-soft: rgba(124,133,255,0.14);
-      --success: #39d98a;
-      --warn: #ffb84d;
-      --bad: #ff6f7f;
+      --bg: #f7f2ea;
+      --bg-2: #fffaf3;
+      --panel: rgba(255,255,255,0.82);
+      --panel-2: rgba(255,248,239,0.92);
+      --panel-3: rgba(255,244,232,0.96);
+      --line: rgba(72,52,33,0.12);
+      --line-2: rgba(72,52,33,0.2);
+      --text: #201811;
+      --text-2: #6e5d4f;
+      --text-3: #8f7c6c;
+      --accent: #b56532;
+      --accent-2: #ca7d49;
+      --accent-soft: rgba(181,101,50,0.12);
+      --success: #2f8f63;
+      --warn: #b97c1d;
+      --bad: #c45a5a;
       --radius: 18px;
       --radius-sm: 12px;
-      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --shadow: 0 24px 70px rgba(97,67,37,0.08);
       --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
@@ -39,9 +39,9 @@
       color: var(--text);
       font-family: var(--sans);
       background:
-        radial-gradient(circle at 15% 10%, rgba(124,133,255,0.16), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(255,255,255,0.08), transparent 18%),
-        linear-gradient(180deg, #05060a 0%, #0a0c12 52%, #05060a 100%);
+        radial-gradient(circle at 15% 10%, rgba(181,101,50,0.12), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(61,111,138,0.10), transparent 18%),
+        linear-gradient(180deg, #fcf8f1 0%, #f6efe4 52%, #f1e8db 100%);
       letter-spacing: -0.01em;
     }
 
@@ -61,7 +61,7 @@
       gap: 16px;
       padding: 14px 18px;
       border: 1px solid var(--line);
-      background: rgba(8, 10, 16, 0.86);
+      background: rgba(255, 251, 244, 0.92);
       backdrop-filter: blur(18px);
       border-radius: 18px;
       box-shadow: var(--shadow);
@@ -78,8 +78,8 @@
     .brand-mark {
       width: 13px;
       height: 13px;
-      background: linear-gradient(135deg, var(--accent), #ffffff);
-      box-shadow: 0 0 30px rgba(124,133,255,0.6);
+      background: linear-gradient(135deg, var(--accent), #f0c59f);
+      box-shadow: 0 0 24px rgba(181,101,50,0.24);
       border-radius: 3px;
       transform: rotate(45deg);
     }
@@ -144,7 +144,7 @@
     .preview-shell,
     .source-panel {
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.02));
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,248,239,0.92));
       border-radius: 22px;
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -162,7 +162,7 @@
       inset: auto -10% -25% auto;
       width: 320px;
       height: 320px;
-      background: radial-gradient(circle, rgba(124,133,255,0.26) 0%, rgba(124,133,255,0) 70%);
+      background: radial-gradient(circle, rgba(181,101,50,0.16) 0%, rgba(181,101,50,0) 70%);
       pointer-events: none;
       filter: blur(10px);
     }
@@ -172,8 +172,8 @@
       align-items: center;
       gap: 10px;
       padding: 8px 12px;
-      border: 1px solid rgba(124,133,255,0.22);
-      background: rgba(124,133,255,0.08);
+      border: 1px solid rgba(181,101,50,0.18);
+      background: rgba(181,101,50,0.08);
       color: var(--accent-2);
       border-radius: 999px;
       font: 11px/1.2 var(--mono);
@@ -230,12 +230,12 @@
       padding: 18px;
       display: grid;
       gap: 14px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(250,243,233,0.92));
     }
 
     .terminal {
       border: 1px solid var(--line);
-      background: #05070c;
+      background: #fffaf4;
       border-radius: 16px;
       padding: 14px;
       min-height: 180px;
@@ -638,7 +638,7 @@
 
       <aside class="hero-side">
         <div class="terminal">
-<span class="muted">$ kimi-k2.6 design-md analyze</span>
+<span class="muted">$ design-md analyze --preview</span>
 > reading product intent
 > mapping tokens into surface system
 > checking CTA clarity
@@ -647,13 +647,13 @@
 <span class="ok">✓ ready for agent handoff</span>
 
 <span class="accent">Signals used:</span>
-- Better Coding, Smarter Agents
-- Agent Swarm / reusable skills
-- sharper full-stack product styling
+- Structured design specs
+- agent-readable handoff quality
+- sharper product execution
         </div>
         <div class="signal-card">
           <strong>What changed in this redesign</strong>
-          <span>Stronger dark-mode composition, less rounded “AI app” chrome, tighter typography, more deliberate surface contrast, and a more product-launch-driven tone.</span>
+          <span>Cleaner editorial hierarchy, calmer light surfaces, tighter typography, more deliberate contrast, and a more product-grade handoff tone.</span>
         </div>
         <div class="signal-card">
           <strong>Core use case</strong>
@@ -739,10 +739,10 @@
     <section class="source-panel">
       <div>
         <h2>Why this redesign looks different</h2>
-        <p>This version is intentionally closer to a sharper high-end agent-tool aesthetic and further away from generic gradient-heavy AI landing pages.</p>
+        <p>This version intentionally leans into a cleaner editorial product surface and away from generic gradient-heavy AI landing pages.</p>
       </div>
       <div class="source-links">
-        <a href="https://kimi.ai" target="_blank" rel="noreferrer">Agent-product positioning signal: better coding, smarter agents, stronger websites, agent teamwork, and reusable skills.</a>
+        <a href="https://openai.com/index/codex-for-almost-everything/" target="_blank" rel="noreferrer">Codex signal: durable agent workflows now need cleaner handoff artifacts, repeatable specs, and operator-readable context.</a>
         <a href="https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/" target="_blank" rel="noreferrer">Google Stitch / DESIGN.md signal: agent-readable design artifacts matter because models should understand intent, not just screenshots.</a>
         <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/" target="_blank" rel="noreferrer">Deep Research Max signal: autonomous research and execution agents are becoming a real product category, increasing the value of cleaner handoff formats.</a>
       </div>
